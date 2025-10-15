@@ -4,6 +4,7 @@ import { useState, useEffect, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import QRCodeDisplay from '@/components/QRCodeDisplay'
 import SVGWheel from '@/components/SVGWheel'
+import { useRaffle } from '@/hooks/useRaffle'
 
 interface Event {
   id: string
@@ -31,7 +32,6 @@ export default function TeamView({ eventId }: TeamViewProps) {
   const router = useRouter()
   const [event, setEvent] = useState<Event | null>(null)
   const [participants, setParticipants] = useState<Participant[]>([])
-  const [raffleWinners, setRaffleWinners] = useState<Participant[]>([])
   const [loading, setLoading] = useState(true)
 
   // Wheel state
@@ -40,23 +40,11 @@ export default function TeamView({ eventId }: TeamViewProps) {
   const [prizeNumber, setPrizeNumber] = useState(0)
   const [wheelSpinning, setWheelSpinning] = useState(false)
   const [lastWinner, setLastWinner] = useState<Participant | null>(null)
+  const { raffleWinners, getAvailableParticipants, addWinner, resetRaffle } = useRaffle({
+    eventId,
+    participants
+  })
 
-  // Load winners from localStorage on component mount
-  useEffect(() => {
-    const savedWinners = localStorage.getItem(`raffle-winners-${eventId}`)
-    if (savedWinners) {
-      try {
-        setRaffleWinners(JSON.parse(savedWinners))
-      } catch (error) {
-        console.error('Error loading saved winners:', error)
-      }
-    }
-  }, [eventId])
-
-  // Save winners to localStorage whenever raffleWinners changes
-  useEffect(() => {
-    localStorage.setItem(`raffle-winners-${eventId}`, JSON.stringify(raffleWinners))
-  }, [raffleWinners, eventId])
 
   // Fetch event data
   const fetchEventData = useCallback(async () => {
@@ -92,12 +80,7 @@ export default function TeamView({ eventId }: TeamViewProps) {
   useEffect(() => {
     fetchEventData()
     fetchParticipants()
-  }, [fetchEventData, fetchParticipants])
-
-  // Helper: Get participants not yet won
-  const getAvailableParticipants = useCallback(() => {
-    return participants.filter(p => !raffleWinners.some(w => w.id === p.id))
-  }, [participants, raffleWinners])
+  }, [fetchEventData, fetchParticipants]) 
 
   const buildWheelData = (participantPool: Participant[]) => {
     console.log('🔍 === BUILDING WHEEL DATA START ===')
@@ -180,33 +163,23 @@ export default function TeamView({ eventId }: TeamViewProps) {
   }
 
   // Reset all winners
-  const resetRaffle = () => {
-    setRaffleWinners([])
+  const resetRaffleLocal = () => {
+    resetRaffle() // Use shared function
     setLastWinner(null)
-    localStorage.removeItem(`raffle-winners-${eventId}`)
+    setShowWheel(false)
   }
 
   // Handle wheel spin completion
-  const handleWheelStop = () => {
+  const handleWheelStop = (winnerIndex: number) => {
+    const winner = wheelData[winnerIndex]
+    if (winner) {
+      const participant = participants.find(p => p.id === winner.id)
+      if (participant) {
+        addWinner(participant) // Use shared function
+        setLastWinner(participant)
+      }
+    }
     setWheelSpinning(false)
-    
-    const winnerEntry = wheelData[prizeNumber]
-    const winner = participants.find(p => p.id === winnerEntry?.id)
-    
-    if (!winner) return
-
-    // Compute the next available list including this winner just picked
-    const nextWinners = raffleWinners.some(w => w.id === winner.id)
-      ? raffleWinners
-      : [...raffleWinners, winner]
-  
-    // Immediately update state: winners + lastWinner
-    setRaffleWinners(nextWinners)
-    setLastWinner(winner)
-  
-    // Rebuild the wheel without the winner (so the wheel on screen updates right away)
-    const nextAvailable = participants.filter(p => !nextWinners.some(w => w.id === p.id))
-    setWheelData(buildWheelData(nextAvailable))
   }
 
   // Close modal
@@ -326,7 +299,7 @@ export default function TeamView({ eventId }: TeamViewProps) {
               </button>
               {raffleWinners.length > 0 && (
                 <button
-                  onClick={resetRaffle}
+                  onClick={resetRaffleLocal}
                   className="bg-red-600 text-white px-4 py-2 rounded-md text-sm hover:bg-red-700"
                 >
                   Reset Raffle
@@ -404,7 +377,7 @@ export default function TeamView({ eventId }: TeamViewProps) {
                     data={wheelData}
                     spinning={wheelSpinning}
                     stopAngle={targetAngle}
-                    onStop={handleWheelStop}
+                    onStop={() => handleWheelStop(validPrize)}
                   />
                 </div>
 

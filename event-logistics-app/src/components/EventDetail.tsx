@@ -1,8 +1,8 @@
 'use client'
 
 import { useState, useEffect, useCallback} from 'react'
-import Image from 'next/image'
 import QRCodeDisplay from './QRCodeDisplay'
+import { useRaffle } from '@/hooks/useRaffle'
 
 interface Event {
   id: string
@@ -26,6 +26,7 @@ interface Participant {
   email: string
   phone_number: string
   event_id: string
+  signup_time: string
 }
 interface EventDetailProps {
     event: Event
@@ -35,8 +36,11 @@ interface EventDetailProps {
 export default function EventDetail({ event, onClose }: EventDetailProps) {
     const [activeTab, setActiveTab] = useState('overview')
     const [participants, setParticipants] = useState<Participant[]>([])
-    const [raffleWinners, setRaffleWinners] = useState<Participant[]>([])
     const [showRaffle, setShowRaffle] = useState(false)
+    const { raffleWinners, conductSimpleRaffle, resetRaffle } = useRaffle({
+      eventId: event.id,
+      participants
+    })
 
 
     const tabs = [
@@ -65,22 +69,12 @@ export default function EventDetail({ event, onClose }: EventDetailProps) {
       fetchParticipants()
     }
   }, [activeTab, fetchParticipants])
+
     const conductRaffle = () => {
-      if (participants.length === 0) return
-      
-      const availableParticipants = participants.filter(p => 
-        !raffleWinners.some(w => w.id === p.id)
-      )
-      
-      if (availableParticipants.length === 0) {
-        alert('All participants have already won!')
-        return
+      const winner = conductSimpleRaffle()
+      if (winner) {
+        setShowRaffle(true)
       }
-      const randomIndex = Math.floor(Math.random() * availableParticipants.length)
-      const winner = availableParticipants[randomIndex]
-      
-      setRaffleWinners(prev => [...prev, winner])
-      setShowRaffle(true)
     }
     const closeRaffle = () => setShowRaffle(false)
     return (
@@ -132,7 +126,9 @@ export default function EventDetail({ event, onClose }: EventDetailProps) {
               raffleWinners={raffleWinners}
               showRaffle={showRaffle}
               onConductRaffle={conductRaffle}
-              onCloseRaffle={closeRaffle}
+              onCloseRaffle={() => setShowRaffle(false)}
+              onResetRaffle={resetRaffle}
+              eventTitle={event.title}
             />}
             {activeTab === 'qr-code' && <QRCodeTab event={event} />}
             {activeTab === 'payments' && <PaymentsTab event={event} />}
@@ -234,13 +230,17 @@ function LogisticsTab({}: { event: Event }) {
     raffleWinners, 
     showRaffle, 
     onConductRaffle, 
-    onCloseRaffle 
+    onCloseRaffle,
+    onResetRaffle,
+    eventTitle
   }: { 
     participants: Participant[]
     raffleWinners: Participant[]
     showRaffle: boolean
     onConductRaffle: () => void
     onCloseRaffle: () => void
+    onResetRaffle: () => void
+    eventTitle: string
   }) {
     return (
       <div className="space-y-6">
@@ -248,13 +248,23 @@ function LogisticsTab({}: { event: Event }) {
           <h3 className="text-lg font-semibold">
             Event Participants ({participants.length})
           </h3>
-          <button
-            onClick={onConductRaffle}
-            disabled={participants.length === 0}
-            className="bg-green-600 text-white px-4 py-2 rounded-md text-sm hover:bg-green-700 disabled:bg-gray-400"
-          >
-            Make Raffle
-          </button>
+          <div className="space-x-2">
+            <button
+              onClick={onConductRaffle}
+              disabled={participants.length === 0}
+              className="bg-green-600 text-white px-4 py-2 rounded-md text-sm hover:bg-green-700 disabled:bg-gray-400"
+            >
+              Make Raffle
+            </button>
+            {raffleWinners.length > 0 && (
+              <button
+                onClick={onResetRaffle}
+                className="bg-red-600 text-white px-4 py-2 rounded-md text-sm hover:bg-red-700"
+              >
+                Reset Raffle
+              </button>
+            )}
+          </div>
         </div>
         {showRaffle && raffleWinners.length > 0 && (
         <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
