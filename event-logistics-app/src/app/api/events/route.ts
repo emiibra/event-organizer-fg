@@ -2,35 +2,27 @@ import { NextRequest, NextResponse } from 'next/server'
 import { supabase } from '@/lib/supabase'
 
 // Simple time converter
+// Normalize any time string to "HH:MM" (handles "6", "6pm", "6:20 PM", "06:20:00 AM", "18:30")
 const convertToTimeFormat = (timeStr: string): string | null => {
-  if (!timeStr || timeStr.trim() === '') return null
-  
-  const time = timeStr.trim().toLowerCase()
-  
-  // Handle formats like "6pm", "6 pm", "6:00pm"
-  const pmMatch = time.match(/(\d{1,2}):?(\d{0,2})\s*pm/)
-  if (pmMatch) {
-    let hours = parseInt(pmMatch[1])
-    const minutes = pmMatch[2] || '00'
-    if (hours !== 12) hours += 12
-    return `${hours.toString().padStart(2, '0')}:${minutes.padStart(2, '0')}`
+  if (!timeStr) return null
+  const raw = String(timeStr).trim().toLowerCase()
+  if (!raw) return null
+
+  // Match hh[:mm][:ss][ am|pm]
+  const m = raw.match(/^(\d{1,2})(?::(\d{2}))?(?::(\d{2}))?\s*(am|pm)?$/i)
+  if (m) {
+    let hour = parseInt(m[1], 10)
+    const minute = m[2] ?? '00'
+    const ampm = (m[4] ?? '').toLowerCase()
+    if (ampm === 'pm' && hour !== 12) hour += 12
+    if (ampm === 'am' && hour === 12) hour = 0
+    if (hour < 0 || hour > 23) return null
+    return `${hour.toString().padStart(2, '0')}:${minute.padStart(2, '0')}` // <- HH:MM only
   }
-  
-  // Handle formats like "6am", "6 am", "6:00am"
-  const amMatch = time.match(/(\d{1,2}):?(\d{0,2})\s*am/)
-  if (amMatch) {
-    let hours = parseInt(amMatch[1])
-    const minutes = amMatch[2] || '00'
-    if (hours === 12) hours = 0
-    return `${hours.toString().padStart(2, '0')}:${minutes.padStart(2, '0')}`
-  }
-  
-  // Handle 24-hour format like "18:30"
-  if (/^\d{1,2}:\d{2}$/.test(time)) {
-    return time
-  }
-  
-  // If we can't parse it, return null
+
+  // Allow plain 24h "hh:mm"
+  if (/^\d{1,2}:\d{2}$/.test(raw)) return raw
+
   return null
 }
 
@@ -72,6 +64,39 @@ export async function POST(request: NextRequest) {
     console.error('❌ API Error:', error)
     return NextResponse.json({  error: error instanceof Error ? error.message : 'Unknown error' 
     }, { status: 500 })
+  }
+}
+
+export async function PUT(request: Request) {
+  try {
+    const eventData = await request.json()
+
+    // Normalize to "HH:MM"
+    if (typeof eventData.setup_time === 'string') {
+      eventData.setup_time = convertToTimeFormat(eventData.setup_time)
+    }
+    if (typeof eventData.start_time === 'string') {
+      eventData.start_time = convertToTimeFormat(eventData.start_time)
+    }
+    if (typeof eventData.end_time === 'string') {
+      eventData.end_time = convertToTimeFormat(eventData.end_time)
+    }
+
+    const { data, error } = await supabase
+      .from('events')
+      .update(eventData)
+      .eq('id', eventData.id)
+      .select()
+      .single()
+
+    if (error) {
+      console.error('Supabase error:', error)
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+    return NextResponse.json(data)
+  } catch (error) {
+    console.error('Error updating event:', error)
+    return NextResponse.json({ error: 'Failed to update event' }, { status: 500 })
   }
 }
 

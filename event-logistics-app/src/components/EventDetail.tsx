@@ -34,15 +34,18 @@ interface EventDetailProps {
     onClose: () => void
   }
 
-export default function EventDetail({ event, onClose }: EventDetailProps) {
+  export default function EventDetail({ event, onClose }: EventDetailProps) {
     const [activeTab, setActiveTab] = useState('overview')
     const [participants, setParticipants] = useState<Participant[]>([])
     const [showRaffle, setShowRaffle] = useState(false)
+    const [isEditing, setIsEditing] = useState(false)
+    const [currentEvent, setCurrentEvent] = useState<Event>(event)
+    const [editedEvent, setEditedEvent] = useState<Event>(event)
+    
     const { raffleWinners, conductSimpleRaffle, resetRaffle } = useRaffle({
       eventId: event.id,
       participants
     })
-
 
     const tabs = [
         { id: 'overview', label: 'Overview' },
@@ -64,6 +67,45 @@ export default function EventDetail({ event, onClose }: EventDetailProps) {
       console.error('Error fetching participants:', error)
     }
   }, [event.id]) 
+  
+  const handleEdit = () => {
+    setEditedEvent(currentEvent) 
+    setIsEditing(true)
+  }
+  
+  const handleSave = async () => {
+    try {
+      const response = await fetch('/api/events', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(editedEvent), // includes id
+      })
+      if (response.ok) {
+        const updated = await response.json()
+        setCurrentEvent(updated)   // <- Use the server’s truth after save
+        setIsEditing(false)
+        alert('Event updated successfully!')
+      } else {
+        const err = await response.json().catch(() => ({}))
+        alert(`Failed to update event${err?.error ? `: ${err.error}` : ''}`)
+      }
+    } catch (e) {
+      console.error('Error updating event:', e)
+      alert('Error updating event')
+    }
+  }
+  
+  const handleCancel = () => {
+    setEditedEvent(event)
+    setIsEditing(false)
+  }
+  
+  const handleInputChange = (field: keyof Event, value: string) => {
+    setEditedEvent(prev => ({
+      ...prev,
+      [field]: value
+    }))
+  }
   
   useEffect(() => {
     if (activeTab === 'participants') {
@@ -118,7 +160,15 @@ export default function EventDetail({ event, onClose }: EventDetailProps) {
 
             {/* Content */}
             <div className="p-6 overflow-y-auto max-h-[60vh]">
-            {activeTab === 'overview' && <OverviewTab event={event} />}
+            {activeTab === 'overview' && <OverviewTab 
+              event={currentEvent}
+              isEditing={isEditing}
+              editedEvent={editedEvent}
+              onEdit={handleEdit}
+              onSave={handleSave}
+              onCancel={handleCancel}
+              onInputChange={handleInputChange}
+            />}
             {activeTab === 'team' && <TeamTab event={event} />}
             {activeTab === 'logistics' && <LogisticsTab event={event} />}
             {activeTab === 'participants' && <ParticipantsTab 
@@ -138,46 +188,238 @@ export default function EventDetail({ event, onClose }: EventDetailProps) {
     )
     }
     // Overview Tab
-function OverviewTab({ event }: { event: Event }) {
-    return (
-      <div className="space-y-6">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-gray-50 p-4 rounded-lg">
-            <h3 className="font-semibold text-gray-900 mb-3">Event Details</h3>
-            <div className="space-y-2 text-sm">
-              <div><span className="font-medium">Title:</span> {event.title}</div>
-              <div><span className="font-medium">Date:</span> {new Date(event.date).toLocaleDateString()}</div>
-              <div><span className="font-medium">Venue:</span> {event.venue}</div>
-              {event.address && <div><span className="font-medium">Address:</span> {event.address}</div>}
-              {event.company_contact && <div><span className="font-medium">Contact:</span> {event.company_contact}</div>}
-              {event.capacity && <div><span className="font-medium">Capacity:</span> {event.capacity}</div>}
-              <div><span className="font-medium">Status:</span> 
-                <span className={`ml-2 px-2 py-1 rounded text-xs ${
-                  event.status === 'active' ? 'bg-green-100 text-green-800' : 
-                  event.status === 'completed' ? 'bg-blue-100 text-blue-800' : 
-                  'bg-gray-100 text-gray-800'
-                }`}>
-                  {event.status}
-                </span>
-              </div>
+function OverviewTab({ event, isEditing, editedEvent, onEdit, onSave, onCancel, onInputChange }: { 
+  event: Event
+  isEditing: boolean
+  editedEvent: Event
+  onEdit: () => void
+  onSave: () => void
+  onCancel: () => void
+  onInputChange: (field: keyof Event, value: string) => void
+}) {
+  return (
+    <div className="space-y-6">
+      <div className="flex justify-between items-center">
+        <h3 className="text-lg font-semibold">Event Details</h3>
+        {!isEditing ? (
+          <button
+            onClick={onEdit}
+            className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700"
+          >
+            Edit Event
+          </button>
+        ) : (
+          <div className="space-x-2">
+            <button
+              onClick={onSave}
+              className="bg-green-600 text-white px-4 py-2 rounded-md text-sm hover:bg-green-700"
+            >
+              Save Changes
+            </button>
+            <button
+              onClick={onCancel}
+              className="bg-gray-600 text-white px-4 py-2 rounded-md text-sm hover:bg-gray-700"
+            >
+              Cancel
+            </button>
+          </div>
+        )}
+      </div>
+
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        {/* Event Details */}
+        <div className="bg-gray-50 p-4 rounded-lg">
+          <h4 className="font-semibold text-gray-900 mb-3">Event Information</h4>
+          <div className="space-y-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Title</label>
+              {isEditing ? (
+                <input
+                  type="text"
+                  value={editedEvent.title}
+                  onChange={(e) => onInputChange('title', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              ) : (
+                <div className="text-sm">{event.title}</div>
+              )}
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Date</label>
+              {isEditing ? (
+                <input
+                  type="date"
+                  value={editedEvent.date}
+                  onChange={(e) => onInputChange('date', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              ) : (
+                <div className="text-sm">{new Date(event.date).toLocaleDateString()}</div>
+              )}
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Venue</label>
+              {isEditing ? (
+                <input
+                  type="text"
+                  value={editedEvent.venue}
+                  onChange={(e) => onInputChange('venue', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              ) : (
+                <div className="text-sm">{event.venue}</div>
+              )}
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Address</label>
+              {isEditing ? (
+                <input
+                  type="text"
+                  value={editedEvent.address || ''}
+                  onChange={(e) => onInputChange('address', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              ) : (
+                <div className="text-sm">{event.address || 'Not specified'}</div>
+              )}
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Company Contact</label>
+              {isEditing ? (
+                <input
+                  type="text"
+                  value={editedEvent.company_contact || ''}
+                  onChange={(e) => onInputChange('company_contact', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              ) : (
+                <div className="text-sm">{event.company_contact || 'Not specified'}</div>
+              )}
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Capacity</label>
+              {isEditing ? (
+                <input
+                  type="number"
+                  value={editedEvent.capacity || ''}
+                  onChange={(e) => onInputChange('capacity', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                />
+              ) : (
+                <div className="text-sm">{event.capacity || 'Not specified'}</div>
+              )}
             </div>
           </div>
-          <div className="bg-gray-50 p-4 rounded-lg">
-          <h3 className="font-semibold text-gray-900 mb-3">Timing</h3>
-          <div className="space-y-2 text-sm">
-            {event.setup_time && <div><span className="font-medium">Setup Time:</span> {event.setup_time}</div>}
-            {event.start_time && <div><span className="font-medium">Start Time:</span> {event.start_time}</div>}
-            {event.end_time && <div><span className="font-medium">End Time:</span> {event.end_time}</div>}
-            <div><span className="font-medium">Created:</span> {new Date(event.created_at).toLocaleDateString()}</div>
+        </div>
+
+        {/* Timing */}
+        <div className="bg-gray-50 p-4 rounded-lg">
+          <h4 className="font-semibold text-gray-900 mb-3">Timing</h4>
+          <div className="space-y-3">
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Setup Time</label>
+              {isEditing ? (
+                <div className="flex space-x-2">
+                  <input
+                    type="text"
+                    value={editedEvent.setup_time || ''}
+                    onChange={(e) => onInputChange('setup_time', e.target.value)}
+                    placeholder="e.g., 2:00"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <select
+                    onChange={(e) => {
+                      const time = editedEvent.setup_time?.replace(/AM|PM/i, '').trim() || ''
+                      onInputChange('setup_time', `${time} ${e.target.value}`)
+                    }}
+                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="AM">AM</option>
+                    <option value="PM">PM</option>
+                  </select>
+                </div>
+              ) : (
+                <div className="text-sm">{event.setup_time || 'Not specified'}</div>
+              )}
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Start Time</label>
+              {isEditing ? (
+                <div className="flex space-x-2">
+                  <input
+                    type="text"
+                    value={editedEvent.start_time || ''}
+                    onChange={(e) => onInputChange('start_time', e.target.value)}
+                    placeholder="e.g., 3:00"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <select
+                    onChange={(e) => {
+                      const time = editedEvent.start_time?.replace(/AM|PM/i, '').trim() || ''
+                      onInputChange('start_time', `${time} ${e.target.value}`)
+                    }}
+                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="AM">AM</option>
+                    <option value="PM">PM</option>
+                  </select>
+                </div>
+              ) : (
+                <div className="text-sm">{event.start_time || 'Not specified'}</div>
+              )}
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">End Time</label>
+              {isEditing ? (
+                <div className="flex space-x-2">
+                  <input
+                    type="text"
+                    value={editedEvent.end_time || ''}
+                    onChange={(e) => onInputChange('end_time', e.target.value)}
+                    placeholder="e.g., 6:00"
+                    className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  />
+                  <select
+                    onChange={(e) => {
+                      const time = editedEvent.end_time?.replace(/AM|PM/i, '').trim() || ''
+                      onInputChange('end_time', `${time} ${e.target.value}`)
+                    }}
+                    className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  >
+                    <option value="AM">AM</option>
+                    <option value="PM">PM</option>
+                  </select>
+                </div>
+              ) : (
+                <div className="text-sm">{event.end_time || 'Not specified'}</div>
+              )}
+            </div>
           </div>
         </div>
+
+      {/* Description */}
+      <div className="bg-gray-50 p-4 rounded-lg">
+        <h4 className="font-semibold text-gray-900 mb-3">Description</h4>
+        {isEditing ? (
+          <textarea
+            value={editedEvent.description || ''}
+            onChange={(e) => onInputChange('description', e.target.value)}
+            rows={4}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="Enter event description..."
+          />
+        ) : (
+          <div className="text-sm text-gray-700">{event.description || 'No description provided'}</div>
+        )}
       </div>
-      {event.description && (
-        <div className="bg-gray-50 p-4 rounded-lg">
-          <h3 className="font-semibold text-gray-900 mb-3">Description</h3>
-          <p className="text-sm text-gray-700">{event.description}</p>
-        </div>
-      )}
+      </div>
     </div>
   )
 }

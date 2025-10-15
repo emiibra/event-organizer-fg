@@ -136,49 +136,88 @@ export default function EventForm({ onEventCreated }: EventFormProps) {
           />
         </div>
 
+        {/* Start Time */}
         <div>
           <label htmlFor="start_time" className="block text-sm font-medium text-gray-700 mb-1">
-            Start Time 
+            Start Time
           </label>
-          <input
-            type="text"
-            id="start_time"
-            name="start_time"
-            value={formData.start_time}
-            onChange={handleInputChange}
-            placeholder="00 pm/am"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+          <div className="flex space-x-2">
+            <input
+              type="text"
+              id="start_time"
+              name="start_time"
+              value={formData.start_time}
+              onChange={handleInputChange}
+              placeholder="e.g., 3:00"
+              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <select
+              onChange={(e) => {
+                const time = formData.start_time?.replace(/AM|PM/i, '').trim() || ''
+                setFormData(prev => ({ ...prev, start_time: `${time} ${e.target.value}` }))
+              }}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="AM">AM</option>
+              <option value="PM">PM</option>
+            </select>
+          </div>
         </div>
 
+        {/* End Time */}
         <div>
           <label htmlFor="end_time" className="block text-sm font-medium text-gray-700 mb-1">
             End Time
           </label>
-          <input
-            type="text"
-            id="end_time"
-            name="end_time"
-            value={formData.end_time}
-            onChange={handleInputChange}
-            placeholder="00 pm/am"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+          <div className="flex space-x-2">
+            <input
+              type="text"
+              id="end_time"
+              name="end_time"
+              value={formData.end_time}
+              onChange={handleInputChange}
+              placeholder="e.g., 6:00"
+              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <select
+              onChange={(e) => {
+                const time = formData.end_time?.replace(/AM|PM/i, '').trim() || ''
+                setFormData(prev => ({ ...prev, end_time: `${time} ${e.target.value}` }))
+              }}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="AM">AM</option>
+              <option value="PM">PM</option>
+            </select>
+          </div>
         </div>
 
+        {/* Setup Time */}
         <div>
           <label htmlFor="setup_time" className="block text-sm font-medium text-gray-700 mb-1">
             Setup Time
           </label>
-          <input
-            type="text"
-            id="setup_time"
-            name="setup_time"
-            value={formData.setup_time}
-            onChange={handleInputChange}
-            placeholder="00 pm/am"
-            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-          />
+          <div className="flex space-x-2">
+            <input
+              type="text"
+              id="setup_time"
+              name="setup_time"
+              value={formData.setup_time}
+              onChange={handleInputChange}
+              placeholder="e.g., 2:00"
+              className="flex-1 px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            />
+            <select
+              onChange={(e) => {
+                const time = formData.setup_time?.replace(/AM|PM/i, '').trim() || ''
+                setFormData(prev => ({ ...prev, setup_time: `${time} ${e.target.value}` }))
+              }}
+              className="px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              <option value="AM">AM</option>
+              <option value="PM">PM</option>
+            </select>
+          </div>
         </div>
 
         <div>
