@@ -3,6 +3,7 @@
 import { useState, useEffect, useCallback} from 'react'
 import QRCodeDisplay from './QRCodeDisplay'
 import { useRaffle } from '@/hooks/useRaffle'
+import { useExcelExport } from '@/hooks/useExcelExport'
 
 interface Event {
   id: string
@@ -76,7 +77,6 @@ export default function EventDetail({ event, onClose }: EventDetailProps) {
         setShowRaffle(true)
       }
     }
-    const closeRaffle = () => setShowRaffle(false)
     return (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4">
         <div className="bg-white rounded-lg w-full max-w-6xl max-h-[90vh] overflow-hidden">
@@ -242,6 +242,7 @@ function LogisticsTab({}: { event: Event }) {
     onResetRaffle: () => void
     eventTitle: string
   }) {
+    const { downloadExcel } = useExcelExport({ participants, eventTitle })
     return (
       <div className="space-y-6">
         <div className="flex justify-between items-center">
@@ -264,6 +265,13 @@ function LogisticsTab({}: { event: Event }) {
                 Reset Raffle
               </button>
             )}
+            <button
+            onClick={downloadExcel}
+            disabled={participants.length === 0}
+            className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700 disabled:bg-gray-400"
+          >
+            Download Excel
+          </button>
           </div>
         </div>
         {showRaffle && raffleWinners.length > 0 && (

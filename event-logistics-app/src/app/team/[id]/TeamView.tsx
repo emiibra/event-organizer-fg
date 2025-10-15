@@ -5,6 +5,7 @@ import { useRouter } from 'next/navigation'
 import QRCodeDisplay from '@/components/QRCodeDisplay'
 import SVGWheel from '@/components/SVGWheel'
 import { useRaffle } from '@/hooks/useRaffle'
+import { useExcelExport } from '@/hooks/useExcelExport'
 
 interface Event {
   id: string
@@ -43,6 +44,10 @@ export default function TeamView({ eventId }: TeamViewProps) {
   const { raffleWinners, getAvailableParticipants, addWinner, resetRaffle } = useRaffle({
     eventId,
     participants
+  })
+  const { shareViaWhatsApp } = useExcelExport({ 
+    participants, 
+    eventTitle: event?.title || 'Event' 
   })
 
 
@@ -181,6 +186,18 @@ export default function TeamView({ eventId }: TeamViewProps) {
     }
     setWheelSpinning(false)
   }
+  const finishEvent = () => {
+    if (participants.length === 0) {
+      alert('No participants to send.')
+      return
+    }
+    
+    // Show confirmation
+    const confirmed = confirm(`Finish event and send Excel to WhatsApp?\n\nParticipants: ${participants.length}`)
+    if (confirmed) {
+      shareViaWhatsApp()
+    }
+  }
 
   // Close modal
   const closeModal = () => {
@@ -305,6 +322,14 @@ export default function TeamView({ eventId }: TeamViewProps) {
                   Reset Raffle
                 </button>
               )}
+              <button
+                onClick={finishEvent}
+                disabled={participants.length === 0}
+                className="bg-purple-600 text-white px-4 py-2 rounded-md text-sm hover:bg-purple-700 disabled:bg-gray-400"
+              >
+                Finish Event
+              </button>
+            </div>
             </div>
           </div>
 
@@ -405,6 +430,5 @@ export default function TeamView({ eventId }: TeamViewProps) {
           )}
         </div>
       </div>
-    </div>
   )
 }
