@@ -71,20 +71,20 @@ export default function Home() {
             No events yet. Create your first event to get started!
           </div>
         ) : (
-          events.map((event) => (
+          events.map((currentEvent) => (
             <div 
-              key={event.id} 
+              key={currentEvent.id} 
               className="border p-4 rounded-lg bg-white shadow-sm transition-shadow cursor-pointer hover:shadow-md"
-              onClick={() => setSelectedEvent(event)}
+              onClick={() => setSelectedEvent(currentEvent)}
             > 
-              <h2 className="text-black text-xl font-semibold">{event.title}</h2>
-              <p className="text-gray-600">{new Date(event.date).toLocaleDateString()}</p>
+              <h2 className="text-black text-xl font-semibold">{currentEvent.title}</h2>
+              <p className="text-gray-600">{currentEvent.date}</p>
               <span className={`px-2 py-1 rounded text-sm ${
-                event.status === 'active' ? 'bg-green-100 text-green-800' : 
-                event.status === 'completed' ? 'bg-blue-100 text-blue-800' : 
+                currentEvent.status === 'active' ? 'bg-green-100 text-green-800' : 
+                currentEvent.status === 'completed' ? 'bg-blue-100 text-blue-800' : 
                 'bg-gray-100 text-gray-800'
               }`}>
-                {event.status}
+                {currentEvent.status}
               </span>
             </div>
           ))

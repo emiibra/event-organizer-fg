@@ -44,7 +44,7 @@ export default function EventForm({ onEventCreated }: EventFormProps) {
     e.preventDefault()
     setLoading(true)
     setMessage('')
-
+    console.log('Form data being sent:', formData)
     try {
       const response = await fetch('/api/events', {
         method: 'POST',

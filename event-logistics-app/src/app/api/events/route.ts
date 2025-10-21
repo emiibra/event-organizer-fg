@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
 
   try {
     const eventData = await request.json()
-    
+    console.log('Received date:', eventData.date)
     const { data, error } = await supabase
       .from('events')
       .insert({
