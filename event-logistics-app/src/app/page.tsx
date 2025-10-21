@@ -46,6 +46,70 @@ export default function Home() {
     setShowForm(false) // Hide the form
   }
 
+  const sendEventDetails = (event: Event) => {
+
+    console.log('sendEventDetails called with:', event) 
+    // Format the date
+    const eventDate = new Date(event.date + 'T12:00:00').toLocaleDateString('en-US', {
+      weekday: 'long',
+      year: 'numeric',
+      month: 'long',
+      day: 'numeric'
+    })
+  
+    // Format times
+    const setupTime = event.setup_time ? new Date(`2000-01-01T${event.setup_time}`).toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    }) : 'TBD'
+  
+    const startTime = event.start_time ? new Date(`2000-01-01T${event.start_time}`).toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    }) : 'TBD'
+  
+    const endTime = event.end_time ? new Date(`2000-01-01T${event.end_time}`).toLocaleTimeString('en-US', {
+      hour: 'numeric',
+      minute: '2-digit',
+      hour12: true
+    }) : 'TBD'
+  
+    // Create the formatted message
+    const message = `*EVENT DETAILS*
+
+    *Event:* ${event.title}
+    *Date:* ${eventDate}
+    *Location:* ${event.venue}${event.address ? `, ${event.address}` : ''}
+    *Time:* ${startTime} - ${endTime}
+    *Setup:* ${setupTime}
+    *Contact:* ${event.company_contact || 'TBD'}
+    *Capacity:* ${event.capacity || 'TBD'} estimated
+    
+    *Description:*
+    ${event.description || 'No description provided'}
+    
+    ---
+    `
+  
+  
+    const userAgent = navigator.userAgent
+    const isMobile = /Android|webOS|iPhone|iPad|iPod|BlackBerry|IEMobile|Opera Mini/i.test(userAgent)
+    // Create WhatsApp link
+    const whatsappMessage = encodeURIComponent(message)
+    const whatsappAppUrl = `https://wa.me/?text=${whatsappMessage}`
+    const whatsappWebUrl = `https://web.whatsapp.com/send?text=${whatsappMessage}`
+    
+    if (isMobile) {
+      console.log('📱 Mobile detected - using WhatsApp App')
+      window.open(whatsappAppUrl, '_blank')
+    } else {
+      console.log('💻 Desktop/Tablet detected - using WhatsApp Web')
+      window.open(whatsappWebUrl, '_blank')
+    }
+  }
+
   if (loading) return <div className="p-8">Loading events...</div>
   return (
     <div className="p-8">
@@ -77,16 +141,29 @@ export default function Home() {
               className="border p-4 rounded-lg bg-white shadow-sm transition-shadow cursor-pointer hover:shadow-md"
               onClick={() => setSelectedEvent(currentEvent)}
             > 
-              <h2 className="text-black text-xl font-semibold">{currentEvent.title}</h2>
-              <p className="text-gray-600">{currentEvent.date}</p>
-              <span className={`px-2 py-1 rounded text-sm ${
-                currentEvent.status === 'active' ? 'bg-green-100 text-green-800' : 
-                currentEvent.status === 'completed' ? 'bg-blue-100 text-blue-800' : 
-                'bg-gray-100 text-gray-800'
-              }`}>
-                {currentEvent.status}
-              </span>
+              <div className="flex justify-between items-start">
+                <div className="flex-1">
+                  <h2 className="text-black text-xl font-semibold">{currentEvent.title}</h2>
+                  <p className="text-gray-600">{currentEvent.date}</p>
+                  <span className={`px-2 py-1 rounded text-sm ${
+                    currentEvent.status === 'active' ? 'bg-green-100 text-green-800' : 
+                    currentEvent.status === 'completed' ? 'bg-blue-100 text-blue-800' : 
+                    'bg-gray-100 text-gray-800'
+                  }`}>
+                    {currentEvent.status}
+                  </span>
+                </div>
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation() // Prevent opening event detail
+                    sendEventDetails(currentEvent)
+                }}
+                className="bg-green-600 hover:bg-green-700 text-white px-3 py-1 rounded text-sm ml-2"
+              >
+                Send Details
+              </button>
             </div>
+          </div>
           ))
         )}
       </div>
@@ -95,6 +172,10 @@ export default function Home() {
         <EventDetail 
           event={selectedEvent} 
           onClose={() => setSelectedEvent(null)} 
+          onEventDeleted={() => {
+            setSelectedEvent(null) // Close the modal
+            fetchEvents() // Refresh the events list
+          }}
         />
       )}
     </div>

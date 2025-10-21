@@ -32,9 +32,10 @@ interface Participant {
 interface EventDetailProps {
     event: Event
     onClose: () => void
+    onEventDeleted?: () => void 
   }
 
-  export default function EventDetail({ event, onClose }: EventDetailProps) {
+  export default function EventDetail({ event, onClose, onEventDeleted }: EventDetailProps) {
     const [activeTab, setActiveTab] = useState('overview')
     const [participants, setParticipants] = useState<Participant[]>([])
     const [showRaffle, setShowRaffle] = useState(false)
@@ -98,6 +99,40 @@ interface EventDetailProps {
   const handleCancel = () => {
     setEditedEvent(event)
     setIsEditing(false)
+  }
+
+  const handleDeleteEvent = async () => {
+    // Show confirmation popup
+    const confirmed = confirm(`Are you sure you want to delete "${currentEvent.title}"?\n\nThis action cannot be undone.`)
+    
+    if (!confirmed) {
+      return // User cancelled
+    }
+  
+    console.log('=== DELETE DEBUG ===')
+    console.log('Event to delete:', currentEvent)
+    console.log('Event ID:', currentEvent.id)
+  
+    try {
+      const response = await fetch(`/api/events?id=${currentEvent.id}`, {
+        method: 'DELETE',
+      })
+  
+      console.log('Delete response status:', response.status)
+  
+      if (response.ok) {
+        alert('Event deleted successfully!')
+        onClose()
+        onEventDeleted?.() // Close the EventDetail modal
+      } else {
+        const errorData = await response.json()
+        console.error('Delete error response:', errorData)
+        alert(`Failed to delete event: ${errorData.error || 'Unknown error'}`)
+      }
+    } catch (error) {
+      console.error('Error deleting event:', error)
+      alert('Error deleting event. Please try again.')
+    }
   }
   
   const handleInputChange = (field: keyof Event, value: string) => {
@@ -168,6 +203,7 @@ interface EventDetailProps {
               onSave={handleSave}
               onCancel={handleCancel}
               onInputChange={handleInputChange}
+              onDelete={handleDeleteEvent}
             />}
             {activeTab === 'team' && <TeamTab event={event} />}
             {activeTab === 'logistics' && <LogisticsTab event={event} />}
@@ -188,7 +224,7 @@ interface EventDetailProps {
     )
     }
     // Overview Tab
-function OverviewTab({ event, isEditing, editedEvent, onEdit, onSave, onCancel, onInputChange }: { 
+function OverviewTab({ event, isEditing, editedEvent, onEdit, onSave, onCancel, onInputChange, onDelete }: { 
   event: Event
   isEditing: boolean
   editedEvent: Event
@@ -196,6 +232,7 @@ function OverviewTab({ event, isEditing, editedEvent, onEdit, onSave, onCancel, 
   onSave: () => void
   onCancel: () => void
   onInputChange: (field: keyof Event, value: string) => void
+  onDelete: () => void
 }) {
   return (
     <div className="space-y-6">
@@ -215,6 +252,12 @@ function OverviewTab({ event, isEditing, editedEvent, onEdit, onSave, onCancel, 
               className="bg-green-600 text-white px-4 py-2 rounded-md text-sm hover:bg-green-700"
             >
               Save Changes
+            </button>
+            <button
+              onClick={onDelete}
+              className="bg-red-600 text-white px-4 py-2 rounded-md text-sm hover:bg-red-700"
+            >
+              Delete Event
             </button>
             <button
               onClick={onCancel}

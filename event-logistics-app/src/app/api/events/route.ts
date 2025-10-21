@@ -115,3 +115,34 @@ export async function GET() {
     }, { status: 500 })
   }
 }
+
+export async function DELETE(request: Request) {
+  try {
+    const { searchParams } = new URL(request.url)
+    const eventId = searchParams.get('id')
+
+    if (!eventId) {
+      return NextResponse.json({ error: 'Event ID is required' }, { status: 400 })
+    }
+
+    console.log('Deleting event with ID:', eventId)
+
+    const { error } = await supabase
+      .from('events')
+      .delete()
+      .eq('id', eventId)
+
+    if (error) {
+      console.error('Supabase delete error:', error)
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    console.log('Event deleted successfully')
+    return NextResponse.json({ message: 'Event deleted successfully' }, { status: 200 })
+  } catch (error: unknown) {
+    console.error('Error deleting event:', error)
+    return NextResponse.json({ 
+      error: error instanceof Error ? error.message : 'Unknown error' 
+    }, { status: 500 })
+  }
+}
