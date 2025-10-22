@@ -129,7 +129,7 @@ interface EventDetailProps {
         console.error('Delete error response:', errorData)
         alert(`Failed to delete event: ${errorData.error || 'Unknown error'}`)
       }
-    } catch (error) {
+        } catch (error) {
       console.error('Error deleting event:', error)
       alert('Error deleting event. Please try again.')
     }
@@ -234,8 +234,8 @@ function OverviewTab({ event, isEditing, editedEvent, onEdit, onSave, onCancel, 
   onInputChange: (field: keyof Event, value: string) => void
   onDelete: () => void
 }) {
-  return (
-    <div className="space-y-6">
+    return (
+      <div className="space-y-6">
       <div className="flex justify-between items-center">
         <h3 className="text-lg font-semibold">Event Details</h3>
         {!isEditing ? (
@@ -269,9 +269,9 @@ function OverviewTab({ event, isEditing, editedEvent, onEdit, onSave, onCancel, 
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
         {/* Event Details */}
-        <div className="bg-gray-50 p-4 rounded-lg">
+          <div className="bg-gray-50 p-4 rounded-lg">
           <h4 className="font-semibold text-gray-900 mb-3">Event Information</h4>
           <div className="space-y-3">
             <div>
@@ -342,7 +342,7 @@ function OverviewTab({ event, isEditing, editedEvent, onEdit, onSave, onCancel, 
               ) : (
                 <div className="text-sm">{event.company_contact || 'Not specified'}</div>
               )}
-            </div>
+              </div>
             
             <div>
               <label className="block text-sm font-medium text-gray-700 mb-1">Capacity</label>
@@ -361,7 +361,7 @@ function OverviewTab({ event, isEditing, editedEvent, onEdit, onSave, onCancel, 
         </div>
 
         {/* Timing */}
-        <div className="bg-gray-50 p-4 rounded-lg">
+          <div className="bg-gray-50 p-4 rounded-lg">
           <h4 className="font-semibold text-gray-900 mb-3">Timing</h4>
           <div className="space-y-3">
             <div>
@@ -491,7 +491,7 @@ function TeamTab({ event }: { event: Event }) {
             <p className="text-sm text-blue-600">{member.phone}</p>
           </div>
         ))}
-      </div>
+        </div>
     </div>
   )
 }
@@ -543,7 +543,7 @@ function LogisticsTab({}: { event: Event }) {
               Make Raffle
             </button>
             {raffleWinners.length > 0 && (
-              <button
+            <button
                 onClick={onResetRaffle}
                 className="bg-red-600 text-white px-4 py-2 rounded-md text-sm hover:bg-red-700"
               >
@@ -556,7 +556,7 @@ function LogisticsTab({}: { event: Event }) {
             className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700 disabled:bg-gray-400"
           >
             Download Excel
-          </button>
+              </button>
           </div>
         </div>
         {showRaffle && raffleWinners.length > 0 && (
@@ -601,8 +601,8 @@ function QRCodeTab({ event }: { event: Event }) {
         eventTitle={event.title}
         showTitle={true}
       />
-    )
-  }
+  )
+}
 
 // Payments Tab
 function PaymentsTab({}: { event: Event }) {

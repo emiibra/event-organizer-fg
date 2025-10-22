@@ -100,19 +100,53 @@ export async function PUT(request: Request) {
   }
 }
 
-export async function GET() {
+export async function GET(request: NextRequest) {
   try {
     const { data, error } = await supabase
       .from('events')
       .select('*')
-      .order('created_at', { ascending: false })
-    if (error) throw error
+      .order('date', { ascending: false })
+
+    if (error) {
+      console.error('Supabase error:', error)
+      return NextResponse.json({ error: error.message }, { status: 500 })
+    }
+
+    // Auto-update status based on date
+    const today = new Date()
+    today.setHours(0, 0, 0, 0) // Reset time to start of day
     
-    return NextResponse.json(data)
-  } catch (error: unknown) {
-    return NextResponse.json({ 
-      error: error instanceof Error ? error.message : 'Unknown error' 
-    }, { status: 500 })
+    const updatedEvents = data.map(event => {
+      const eventDate = new Date(event.date)
+      eventDate.setHours(0, 0, 0, 0)
+      
+      // Check if event is missing required info
+      const hasRequiredInfo = event.address && event.start_time && event.end_time
+      
+      // Auto-update status
+      if (eventDate < today) {
+        return { ...event, status: 'completed' }
+      } else if (!hasRequiredInfo) {
+        return { ...event, status: 'draft' }
+      } else {
+        return { ...event, status: 'active' }
+      }
+    })
+
+    // Update events in database if status changed
+    for (const event of updatedEvents) {
+      if (event.status !== data.find(e => e.id === event.id)?.status) {
+        await supabase
+          .from('events')
+          .update({ status: event.status })
+          .eq('id', event.id)
+      }
+    }
+
+    return NextResponse.json(updatedEvents)
+  } catch (error) {
+    console.error('Error fetching events:', error)
+    return NextResponse.json({ error: 'Failed to fetch events' }, { status: 500 })
   }
 }
 
