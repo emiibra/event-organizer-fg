@@ -1,6 +1,7 @@
 'use client'
 
 import { useState } from 'react'
+import ImageUpload from './ImageUpload'
 
 interface EventFormData {
   title: string
@@ -32,13 +33,20 @@ export default function EventForm({ onEventCreated }: EventFormProps) {
     address: '',
     company_contact: '',
     capacity: 0,
-    description: '',
+    description: `BOOTH:
+    • Banner 
+    • Table + FG tablecloth
+    • Business cards
+    • QR codes (raffle + social media)
+    • Merch (hats, tote bags(blue and transparent), backpacks, bottles, thermo cups, sanitizer, lunch box.)
+    • Raffle Item if applicable`,
     status: 'draft',
     coordinator_email: 'emiliaabravo19@gmail.com'
   })
   
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
+  const [extractedData, setExtractedData] = useState<any>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -90,6 +98,25 @@ export default function EventForm({ onEventCreated }: EventFormProps) {
       [name]: value
     }))
   }
+
+  const handleDataExtracted = (data: any) => {
+    setExtractedData(data)
+    
+    // Auto-fill form with extracted data
+    setFormData(prev => ({
+      ...prev,
+      title: data.title || prev.title,
+      date: data.date || prev.date,
+      start_time: data.start_time || prev.start_time,
+      end_time: data.end_time || prev.end_time,
+      setup_time: data.setup_time || prev.setup_time,
+      venue: data.venue || prev.venue,
+      address: data.address || prev.address,
+      company_contact: data.company_contact || prev.company_contact,
+      capacity: data.capacity || prev.capacity,
+      description: data.description || prev.description
+    }))
+  }
     
 
   return (
@@ -103,6 +130,10 @@ export default function EventForm({ onEventCreated }: EventFormProps) {
           {message}
         </div>
       )}
+      <ImageUpload 
+        onDataExtracted={handleDataExtracted}
+        disabled={loading}
+      />
 
       <form onSubmit={handleSubmit} className="space-y-4">
         <div>
