@@ -1,6 +1,4 @@
 'use client'
-
-import Image from 'next/image'
 import { useQRCode } from '@/hooks/useQRCode'
 
 interface QRCodeDisplayProps {
@@ -53,9 +51,6 @@ export default function QRCodeDisplay({
       {showQRCode && qrCodeUrl && (
         <div className="text-center">
           <h4 className="font-medium text-gray-900 mb-4">QR Code for {eventTitle}</h4>
-          <div className="bg-white p-4 rounded-lg border inline-block">
-            <Image src={qrCodeUrl} alt="QR Code" className="mx-auto" width={300} height={300} />
-          </div>
           <p className="text-sm text-gray-600 mt-4">
             Print this QR code or display it on a screen at your event
           </p>

@@ -73,13 +73,6 @@ export default function SVGWheel({
             const y = cy + midR * Math.sin(theta)
               // Keep text upright
             const needsFlip = angleDeg > 90 && angleDeg < 270
-            const rotation = angleDeg + 90 + (needsFlip ? -180 : 0)
-
-            // Auto-scale for many slices
-            const fontSize =
-                data.length >= 50 ? 8 :
-                data.length >= 30 ? 10 :
-                data.length >= 16 ? 12 : 14
 
           return (
             <g key={i}>
