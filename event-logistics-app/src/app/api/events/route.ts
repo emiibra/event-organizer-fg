@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { getSupabaseClient } from '@/lib/supabase'
 
 // Simple time converter
 // Normalize any time string to "HH:MM" (handles "6", "6pm", "6:20 PM", "06:20:00 AM", "18:30")
@@ -35,7 +35,7 @@ export async function POST(request: NextRequest) {
   try {
     const eventData = await request.json()
     console.log('Received date:', eventData.date)
-    const { data, error } = await supabase
+    const { data, error } = await getSupabaseClient()  
       .from('events')
       .insert({
         title: eventData.title,
@@ -82,7 +82,7 @@ export async function PUT(request: Request) {
       eventData.end_time = convertToTimeFormat(eventData.end_time)
     }
 
-    const { data, error } = await supabase
+    const { data, error } = await getSupabaseClient()
       .from('events')
       .update(eventData)
       .eq('id', eventData.id)
@@ -102,7 +102,7 @@ export async function PUT(request: Request) {
 
   export async function GET() {
   try {
-    const { data, error } = await supabase
+    const { data, error } = await getSupabaseClient()
       .from('events')
       .select('*')
       .order('date', { ascending: false })
@@ -136,7 +136,7 @@ export async function PUT(request: Request) {
     // Update events in database if status changed
     for (const event of updatedEvents) {
       if (event.status !== data.find(e => e.id === event.id)?.status) {
-        await supabase
+        await getSupabaseClient()
           .from('events')
           .update({ status: event.status })
           .eq('id', event.id)
@@ -161,7 +161,7 @@ export async function DELETE(request: Request) {
 
     console.log('Deleting event with ID:', eventId)
 
-    const { error } = await supabase
+    const { error } = await getSupabaseClient()
       .from('events')
       .delete()
       .eq('id', eventId)

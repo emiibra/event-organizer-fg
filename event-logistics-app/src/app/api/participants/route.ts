@@ -1,5 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server'
-import { supabase } from '@/lib/supabase'
+import { getSupabaseClient } from '@/lib/supabase'
 
 // GET method - para obtener participantes
 export async function GET(request: NextRequest) {
@@ -11,7 +11,7 @@ export async function GET(request: NextRequest) {
         return NextResponse.json({ error: 'Event ID is required' }, { status: 400 })
       }
   
-      const { data, error } = await supabase
+      const { data, error } = await getSupabaseClient()
         .from('participants')
         .select('*')
         .eq('event_id', eventId)
@@ -34,7 +34,7 @@ export async function POST(request: NextRequest) {
   try {
     const participantData = await request.json()
     
-    const { data, error } = await supabase
+    const { data, error } = await getSupabaseClient()  
       .from('participants')
       .insert({
         full_name: participantData.fullName,
