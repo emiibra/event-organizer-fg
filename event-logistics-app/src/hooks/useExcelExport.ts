@@ -70,6 +70,7 @@ export function useExcelExport({ participants, eventTitle }: UseExcelExportProps
     // Create WhatsApp message with instructions
     const text = `📊 Participants Excel for "${eventTitle}"\n\nHere's the Excel file with ${participants.length} participants.`
     
+    
     // Open WhatsApp
     const wa = `https://wa.me/16783604682?text=${encodeURIComponent(text)}`
     window.open(wa, '_blank')
