@@ -66,7 +66,6 @@ export function useExcelExport({ participants, eventTitle }: UseExcelExportProps
     
     // Create a data URL for the CSV
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
-    const file = new File([blob], `participants_${eventTitle.replace(/\s+/g, '_')}.csv`, { type: 'text/csv' })
     
     // Create WhatsApp message with instructions
     const text = `📊 Participants Excel for "${eventTitle}"\n\nHere's the Excel file with ${participants.length} participants.`
