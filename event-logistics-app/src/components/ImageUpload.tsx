@@ -2,9 +2,23 @@
 
 import { useState, useRef } from 'react'
 import { useImageAnalysis } from '@/hooks/useImageAnalysis'
+import Image from 'next/image'
+
+interface ExtractedData {
+  title?: string
+  date?: string
+  start_time?: string
+  end_time?: string
+  setup_time?: string
+  venue?: string
+  address?: string
+  company_contact?: string
+  capacity?: number
+  description?: string
+}
 
 interface ImageUploadProps {
-  onDataExtracted: (data: any) => void
+  onDataExtracted: (data: ExtractedData) => void  // Changed from any to ExtractedData
   disabled?: boolean
 }
 
@@ -95,11 +109,13 @@ export default function ImageUpload({ onDataExtracted, disabled }: ImageUploadPr
       ) : (
         <div className="space-y-2">
           <div className="relative">
-            <img
-              src={previewUrl || ''}
-              alt="Uploaded event image"
-              className="w-full h-48 object-cover rounded-lg border"
-            />
+          <Image
+            src={previewUrl || ''}
+            alt="Uploaded event image"
+            width={800}
+            height={192}
+            className="w-full h-48 object-cover rounded-lg border"
+          />
             <button
               onClick={clearImage}
               className="absolute top-2 right-2 bg-red-500 text-white rounded-full p-1 hover:bg-red-600"

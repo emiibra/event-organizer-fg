@@ -1,4 +1,5 @@
 'use client'
+import Image from 'next/image'
 
 interface HeaderProps {
   activeTab: string
@@ -11,9 +12,11 @@ export default function Header({ activeTab, onTabChange }: HeaderProps) {
       {/* Main Title with Logo */}
       <div className="flex justify-between items-center mb-0">
         <h1 className="text-3xl font-bold text-black">Event Logistics Manager</h1>
-        <img 
+        <Image 
           src="/fry-goehring-logo.png" 
           alt="Fry | Goehring Logo" 
+          width={100}
+          height={25}
           className="h-25 w-auto"
         />
       </div>

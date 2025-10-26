@@ -261,7 +261,7 @@ export default function TeamView({ eventId }: TeamViewProps) {
   // Calculate wheel spin angle
   const validPrize = Math.min(Math.max(prizeNumber, 0), Math.max(wheelData.length - 1, 0))
   const sliceAngle = wheelData.length > 0 ? 360 / wheelData.length : 0
-  const spins = 5                    // full rotations for animation
+  const spins = 5                   // full rotations for animation
   const pointerDeg = 270             // 12 o'clock in CSS/SVG coordinates
   const centerOfPrizeDeg = (validPrize + 0.5) * sliceAngle
 

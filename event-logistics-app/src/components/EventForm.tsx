@@ -46,7 +46,6 @@ export default function EventForm({ onEventCreated }: EventFormProps) {
   
   const [loading, setLoading] = useState(false)
   const [message, setMessage] = useState('')
-  const [extractedData, setExtractedData] = useState<any>(null)
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault()
@@ -98,11 +97,21 @@ export default function EventForm({ onEventCreated }: EventFormProps) {
       [name]: value
     }))
   }
+  interface ExtractedData {
+    title?: string
+    date?: string
+    start_time?: string
+    end_time?: string
+    setup_time?: string
+    venue?: string
+    address?: string
+    company_contact?: string
+    capacity?: number
+    description?: string
+  }
 
-  const handleDataExtracted = (data: any) => {
-    setExtractedData(data)
-    
-    // Auto-fill form with extracted data
+  const handleDataExtracted = (data: ExtractedData) => {
+    // Auto-fill form with extracted data (remove setExtractedData(data))
     setFormData(prev => ({
       ...prev,
       title: data.title || prev.title,
