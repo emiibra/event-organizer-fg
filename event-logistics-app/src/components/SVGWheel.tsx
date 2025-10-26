@@ -19,7 +19,7 @@ export default function SVGWheel({
   const cx = radius
   const cy = radius
   const slice = data.length > 0 ? (2 * Math.PI) / data.length : 0
-
+// Updated deployment
   return (
     <div style={{ position: 'relative', width: size, height: size + pointerH }}>
     <div
