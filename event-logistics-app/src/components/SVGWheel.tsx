@@ -120,7 +120,7 @@ export default function SVGWheel({
           )
         })}
 
-        {/* 3) Outer rim */}
+        {/* 3) Outer border rim */}
         <circle
           cx={cx}
           cy={cy}
