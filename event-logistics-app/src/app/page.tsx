@@ -77,22 +77,6 @@ export default function Home() {
     }
   }
   
-  // Helper function to update event status
-  const updateEventStatus = async (eventId: string, newStatus: string) => {
-    try {
-      await fetch('/api/events', {
-        method: 'PUT',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ 
-          id: eventId, 
-          status: newStatus 
-        })
-      })
-    } catch (error) {
-      console.error('Error updating event status:', error)
-    }
-  }
-  
   const handleEventCreated = () => {
     fetchEvents() // Refresh the events list
     setShowForm(false) // Hide the form

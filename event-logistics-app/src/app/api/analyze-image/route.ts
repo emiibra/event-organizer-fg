@@ -52,11 +52,23 @@ export async function POST(request: NextRequest) {
     const extractedText = visionData.responses[0]?.textAnnotations?.[0]?.description || ''
     console.log('Extracted text length:', extractedText.length)
     
-    function parseEventText(text: string): any {
+    interface ParsedEventData {
+      title?: string
+      date?: string
+      start_time?: string
+      end_time?: string
+      setup_time?: string
+      venue?: string
+      address?: string
+      company_contact?: string
+      capacity?: number
+    }
+    
+    function parseEventText(text: string): ParsedEventData {
       console.log('Raw extracted text:', text)
       
       const lines = text.split('\n').map(line => line.trim()).filter(line => line.length > 0)
-      const eventData: any = {}
+      const eventData: ParsedEventData = {}
       
       // UNIVERSAL TITLE DETECTION - Works for ANY event type
       let titleLine = null
@@ -333,8 +345,8 @@ export async function POST(request: NextRequest) {
               eventData.setup_time = `${setupHour12}:${setupMinute.toString().padStart(2, '0')} ${setupIsPM ? 'PM' : 'AM'}`
               
               // Calculate end time (5 hours after start)
-              let endHour = hour24 + 5
-              let endMinute = startMinute
+              const endHour = hour24 + 5
+              const endMinute = startMinute
               
               // Convert back to 12-hour format for end time
               let endHour12 = endHour

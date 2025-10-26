@@ -100,7 +100,7 @@ export async function PUT(request: Request) {
   }
 }
 
-export async function GET(request: NextRequest) {
+  export async function GET() {
   try {
     const { data, error } = await supabase
       .from('events')
