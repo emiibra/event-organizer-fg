@@ -35,13 +35,28 @@ export default function Home() {
   const fetchEvents = async () => {
     try {
       const response = await fetch('/api/events')
+      
+      // Check if response is ok
+      if (!response.ok) {
+        console.error('Failed to fetch events:', response.status)
+        setEvents([]) // Set empty array on error
+        return
+      }
+      
       const data = await response.json()
+      
+      // Check if data is an array
+      if (!Array.isArray(data)) {
+        console.error('API returned non-array data:', data)
+        setEvents([]) // Set empty array if not an array
+        return
+      }
       
       // Auto-update event status based on date
       const today = new Date()
       today.setHours(0, 0, 0, 0) // Reset time to start of day
       
-      const updatedEvents = data.map((event: Event) => {
+      const updatedEvents = data.map((event: Event)  => {
         const eventDate = new Date(event.date)
         eventDate.setHours(0, 0, 0, 0) // Reset time to start of day
         
