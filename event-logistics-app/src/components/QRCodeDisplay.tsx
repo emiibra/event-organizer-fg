@@ -91,7 +91,8 @@ export default function QRCodeDisplay({
         doc.setFontSize(fitFontSize(doc, gw, 110, maxTextW))
         doc.text(gw, pageW / 2, gY, { align: 'center', maxWidth: maxTextW })
     
-        // QR frame (larger)
+        // QR frame (larger))
+
         const qrBox = 320
         const qx = (pageW - qrBox) / 2
         const qy = gY + 60
