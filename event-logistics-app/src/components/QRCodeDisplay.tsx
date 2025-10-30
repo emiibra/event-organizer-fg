@@ -1,5 +1,6 @@
 'use client'
 import { useQRCode } from '@/hooks/useQRCode'
+import Image from 'next/image' 
 
 interface QRCodeDisplayProps {
   eventId: string
@@ -41,7 +42,7 @@ export default function QRCodeDisplay({
         const { jsPDF } = await import('jspdf')
     
         // Helper: fit text to width without stretching
-        const fitFontSize = (doc: any, text: string, base: number, maxWidth: number) => {
+        const fitFontSize = (doc: InstanceType<typeof jsPDF>, text: string, base: number, maxWidth: number) => {
           doc.setFontSize(base)
           const w = doc.getTextWidth(text)
           return w > maxWidth ? Math.max(40, Math.floor((base * maxWidth) / w)) : base
@@ -153,9 +154,11 @@ export default function QRCodeDisplay({
       {showQRCode && qrCodeUrl && (
         <div className="text-center">
           <h4 className="font-medium text-gray-900 mb-4">QR Code for {eventTitle}</h4>
-          <img
+          <Image
             src={qrCodeUrl}
             alt={`QR code for ${eventTitle}`}
+            width={256}
+            height={256}
             className="mx-auto w-64 h-64 rounded border"
           />
           <p className="text-sm text-gray-600 mt-4">
