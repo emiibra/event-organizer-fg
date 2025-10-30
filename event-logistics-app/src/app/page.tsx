@@ -20,6 +20,7 @@ interface Event {
   coordinator_email: string
   created_at: string
   description?: string
+  raffle_item?: string
 }
 
 export default function Home() {
@@ -135,10 +136,9 @@ export default function Home() {
     *Setup:* ${setupTime}
     *Contact:* ${event.company_contact || 'TBD'}
     *Capacity:* ${event.capacity || 'TBD'} estimated
-    
     *Description:*
     ${event.description || 'No description provided'}
-    
+    *Raffle Item:* ${event.raffle_item || 'No raffle item provided'}
     ---
     `
   }
@@ -283,6 +283,12 @@ export default function Home() {
           onEventDeleted={() => {
             setSelectedEvent(null) // Close the modal
             fetchEvents() // Refresh the events list
+          }}
+          onEventUpdated={(updated) => {
+            // patch list in memory so UI updates immediately
+            setEvents(prev => prev.map(e => e.id === updated.id ? updated : e))
+            // also update the modal’s selectedEvent so it reflects the new data
+            setSelectedEvent(updated)
           }}
         />
       )}

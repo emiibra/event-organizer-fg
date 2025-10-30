@@ -14,6 +14,7 @@ interface Event {
   venue: string
   start_time?: string
   end_time?: string
+  raffle_item?: string
 }
 
 interface Participant {
@@ -291,37 +292,38 @@ export default function TeamView({ eventId }: TeamViewProps) {
       </div>
 
       <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        {/* QR Code Section */}
-        <div className="bg-white rounded-lg shadow p-6">
+          {/* QR Code Section */}
+          <div className="bg-white rounded-lg shadow p-6">
           <QRCodeDisplay
             eventId={eventId}
             eventTitle={event?.title || 'Event'}
+            raffleItem={event?.raffle_item as string}
             showTitle={true}
           />
-        </div>
+          </div>
 
-        {/* Participants & Raffle Section */}
+          {/* Participants & Raffle Section */}
         <div className="bg-white rounded-lg shadow p-6 mt-6">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold text-gray-900">
-              Participants ({participants.length})
-            </h2>
-            <div className="space-x-2">
-              <button
-                onClick={openRaffleWheel}
-                disabled={participants.length === 0}
-                className="bg-green-600 text-white px-4 py-2 rounded-md text-sm hover:bg-green-700 disabled:bg-gray-400"
-              >
-                Make Raffle
-              </button>
-              {raffleWinners.length > 0 && (
+            <div className="flex justify-between items-center mb-6">
+              <h2 className="text-xl font-semibold text-gray-900">
+                Participants ({participants.length})
+              </h2>
+              <div className="space-x-2">
                 <button
-                  onClick={resetRaffleLocal}
-                  className="bg-red-600 text-white px-4 py-2 rounded-md text-sm hover:bg-red-700"
+                onClick={openRaffleWheel}
+                  disabled={participants.length === 0}
+                  className="bg-green-600 text-white px-4 py-2 rounded-md text-sm hover:bg-green-700 disabled:bg-gray-400"
                 >
-                  Reset Raffle
+                  Make Raffle
                 </button>
-              )}
+                {raffleWinners.length > 0 && (
+                  <button
+                  onClick={resetRaffleLocal}
+                    className="bg-red-600 text-white px-4 py-2 rounded-md text-sm hover:bg-red-700"
+                  >
+                    Reset Raffle
+                  </button>
+                )}
               <button
                 onClick={finishEvent}
                 disabled={participants.length === 0}
@@ -330,49 +332,49 @@ export default function TeamView({ eventId }: TeamViewProps) {
                 Finish Event
               </button>
             </div>
+              </div>
             </div>
-          </div>
 
           {/* Winners Display */}
           {raffleWinners.length > 0 && (
-            <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg mb-6">
+              <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg mb-6">
               <h3 className="font-semibold text-yellow-800 mb-2">
                 Raffle Winners ({raffleWinners.length}):
               </h3>
-              {raffleWinners.map((winner, index) => (
-                <div key={winner.id} className="text-sm text-yellow-700 mb-1">
-                  {index + 1}. {winner.full_name} - {winner.email} - {winner.phone_number}
-                </div>
-              ))}
-            </div>
-          )}
-
-          {/* Participants List */}
-          <div className="max-h-96 overflow-y-auto">
-            {participants.length > 0 ? (
-              <div className="space-y-3">
-                {participants.map((participant) => (
-                  <div key={participant.id} className="bg-gray-50 p-3 rounded-lg">
-                    <div className="flex justify-between items-start">
-                      <div>
-                        <h4 className="font-medium text-gray-900">{participant.full_name}</h4>
-                        <p className="text-sm text-gray-600">{participant.email}</p>
-                        <p className="text-sm text-gray-600">{participant.phone_number}</p>
-                      </div>
-                      {raffleWinners.some(w => w.id === participant.id) && (
-                        <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">
-                          Winner!
-                        </span>
-                      )}
-                    </div>
+                {raffleWinners.map((winner, index) => (
+                  <div key={winner.id} className="text-sm text-yellow-700 mb-1">
+                    {index + 1}. {winner.full_name} - {winner.email} - {winner.phone_number}
                   </div>
                 ))}
               </div>
-            ) : (
-              <div className="text-center text-gray-500 py-8">
-                No participants yet. Share the QR code to get signups!
-              </div>
             )}
+
+            {/* Participants List */}
+            <div className="max-h-96 overflow-y-auto">
+              {participants.length > 0 ? (
+                <div className="space-y-3">
+                  {participants.map((participant) => (
+                    <div key={participant.id} className="bg-gray-50 p-3 rounded-lg">
+                      <div className="flex justify-between items-start">
+                        <div>
+                          <h4 className="font-medium text-gray-900">{participant.full_name}</h4>
+                          <p className="text-sm text-gray-600">{participant.email}</p>
+                          <p className="text-sm text-gray-600">{participant.phone_number}</p>
+                        </div>
+                        {raffleWinners.some(w => w.id === participant.id) && (
+                          <span className="bg-yellow-100 text-yellow-800 text-xs px-2 py-1 rounded">
+                            Winner!
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="text-center text-gray-500 py-8">
+                  No participants yet. Share the QR code to get signups!
+                </div>
+              )}
           </div>
 
           {/* Raffle Wheel Modal */}
@@ -425,10 +427,10 @@ export default function TeamView({ eventId }: TeamViewProps) {
                     </button>
                   )}
                 </div>
-              </div>
             </div>
+          </div>
           )}
-        </div>
       </div>
+    </div>
   )
 }

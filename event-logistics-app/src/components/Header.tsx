@@ -12,18 +12,21 @@ export default function Header({ activeTab, onTabChange }: HeaderProps) {
       {/* Main Title with Logo */}
       <div className="flex justify-between items-center mb-0">
         <h1 className="text-3xl font-bold text-black">Event Logistics Manager</h1>
-        <Image 
+        {/*<Image 
           src="/fry-goehring-logo.png" 
           alt="Fry | Goehring Logo" 
           width={100}
           height={25}
           className="h-25 w-auto"
-        />
+        />*/}
       </div>
       
       {/* Navigation Tabs */}
       <div className="border-b border-gray-200 bg-white">
-        <nav className="flex space-x-8">
+        <nav
+          className="flex space-x-8 overflow-x-auto no-scrollbar"
+          style={{ WebkitOverflowScrolling: 'touch' }}
+        >
           <button
             onClick={() => onTabChange('events')}
             className={`py-4 px-1 border-b-2 font-medium text-sm ${

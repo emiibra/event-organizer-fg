@@ -49,7 +49,8 @@ export async function POST(request: NextRequest) {
         capacity: eventData.capacity || null,
         description: eventData.description || null,
         status: eventData.status,
-        coordinator_email: 'emiliaabravo19@gmail.com'
+        coordinator_email: 'emiliaabravo19@gmail.com',
+        raffle_item: eventData.raffle_item || null,
       })
       .select()
       .single()

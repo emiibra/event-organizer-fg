@@ -16,6 +16,7 @@ interface EventFormData {
   description?: string
   status: string
   coordinator_email: string
+  raffle_item?: string
 }
 
 interface EventFormProps {
@@ -38,10 +39,10 @@ export default function EventForm({ onEventCreated }: EventFormProps) {
     • Table + FG tablecloth
     • Business cards
     • QR codes (raffle + social media)
-    • Merch (hats, tote bags(blue and transparent), backpacks, bottles, thermo cups, sanitizer, lunch box.)
-    • Raffle Item if applicable`,
+    • Merch (hats, tote bags(blue and transparent), backpacks, bottles, thermo cups, sanitizer, lunch box.)`,
     status: 'draft',
-    coordinator_email: 'emiliaabravo19@gmail.com'
+    coordinator_email: 'emiliaabravo19@gmail.com',
+    raffle_item: '',
   })
   
   const [loading, setLoading] = useState(false)
@@ -76,7 +77,8 @@ export default function EventForm({ onEventCreated }: EventFormProps) {
           capacity: 0,
           description: '',
           status: 'draft',
-          coordinator_email: 'emiliaabravo19@gmail.com'
+          coordinator_email: 'emiliaabravo19@gmail.com',
+          raffle_item: '',  
         })
         onEventCreated() // Refresh the events list
       } else {
@@ -108,6 +110,7 @@ export default function EventForm({ onEventCreated }: EventFormProps) {
     company_contact?: string
     capacity?: number
     description?: string
+    raffle_item?: string
   }
 
   const handleDataExtracted = (data: ExtractedData) => {
@@ -123,7 +126,8 @@ export default function EventForm({ onEventCreated }: EventFormProps) {
       address: data.address || prev.address,
       company_contact: data.company_contact || prev.company_contact,
       capacity: data.capacity || prev.capacity,
-      description: data.description || prev.description
+      description: data.description || prev.description,
+      raffle_item: data.raffle_item || prev.raffle_item,
     }))
   }
     
@@ -333,6 +337,20 @@ export default function EventForm({ onEventCreated }: EventFormProps) {
             rows={3}
             className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
             placeholder="Enter event description"
+          />
+        </div>
+        <div>
+          <label htmlFor="raffle_item" className="block text-sm font-medium text-gray-700 mb-1">
+            Raffle Item
+          </label>
+          <input
+            type="text"
+            id="raffle_item"
+            name="raffle_item"
+            value={formData.raffle_item}
+            onChange={handleInputChange}
+            className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+            placeholder="e.g., Tablet, Gift Card, Tequila Bottle"
           />
         </div>
 

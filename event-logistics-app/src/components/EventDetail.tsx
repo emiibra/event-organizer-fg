@@ -20,6 +20,7 @@ interface Event {
   coordinator_email: string
   created_at: string
   description?: string
+  raffle_item?: string  
 }
 interface Participant {
   id: string
@@ -33,9 +34,10 @@ interface EventDetailProps {
     event: Event
     onClose: () => void
     onEventDeleted?: () => void 
+    onEventUpdated?: (updated: Event) => void
   }
 
-  export default function EventDetail({ event, onClose, onEventDeleted }: EventDetailProps) {
+  export default function EventDetail({ event, onClose, onEventDeleted, onEventUpdated }: EventDetailProps) {
     const [activeTab, setActiveTab] = useState('overview')
     const [participants, setParticipants] = useState<Participant[]>([])
     const [showRaffle, setShowRaffle] = useState(false)
@@ -85,6 +87,7 @@ interface EventDetailProps {
         const updated = await response.json()
         setCurrentEvent(updated)   // <- Use the server’s truth after save
         setIsEditing(false)
+        onEventUpdated?.(updated)  
         alert('Event updated successfully!')
       } else {
         const err = await response.json().catch(() => ({}))
@@ -176,7 +179,10 @@ interface EventDetailProps {
             </div>
             {/* Tabs */}
             <div className="border-b border-gray-200">
-            <nav className="flex space-x-8 px-6">
+            <nav
+              className="flex space-x-8 px-6 overflow-x-auto no-scrollbar"
+              style={{ WebkitOverflowScrolling: 'touch' }}
+            >
                 {tabs.map((tab) => (
                 <button
                     key={tab.id}
@@ -355,6 +361,21 @@ function OverviewTab({ event, isEditing, editedEvent, onEdit, onSave, onCancel, 
                 />
               ) : (
                 <div className="text-sm">{event.capacity || 'Not specified'}</div>
+              )}
+            </div>
+            
+            <div>
+              <label className="block text-sm font-medium text-gray-700 mb-1">Raffle Item</label>
+              {isEditing ? (
+                <input
+                  type="text"
+                  value={editedEvent.raffle_item || ''}
+                  onChange={(e) => onInputChange('raffle_item', e.target.value)}
+                  className="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
+                  placeholder="Enter raffle item"
+                />
+              ) : (
+                <div className="text-sm">{event.raffle_item || 'Not specified'}</div>
               )}
             </div>
           </div>
@@ -554,7 +575,7 @@ function LogisticsTab({}: { event: Event }) {
             onClick={downloadExcel}
             disabled={participants.length === 0}
             className="bg-blue-600 text-white px-4 py-2 rounded-md text-sm hover:bg-blue-700 disabled:bg-gray-400"
-          >
+            >
             Download Excel
               </button>
           </div>
