@@ -127,6 +127,7 @@ export default function Home() {
     }) : 'TBD'
   
     // Create the formatted message
+    const teamViewLink = `${typeof window !== 'undefined' ? window.location.origin : ''}/team/${event.id}`
     return `*EVENT DETAILS*
 
     *Event:* ${event.title}
@@ -140,6 +141,8 @@ export default function Home() {
     ${event.description || 'No description provided'}
     *Raffle Item:* ${event.raffle_item || 'No raffle item provided'}
     ---
+    
+Team View: ${teamViewLink}
     `
   }
 

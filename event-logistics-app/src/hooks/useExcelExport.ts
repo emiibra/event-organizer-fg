@@ -14,9 +14,10 @@ interface Participant {
 interface UseExcelExportProps {
   participants: Participant[]
   eventTitle: string
+  eventId?: string
 }
 
-export function useExcelExport({ participants, eventTitle }: UseExcelExportProps) {
+export function useExcelExport({ participants, eventTitle, eventId }: UseExcelExportProps) {
   
   // Generate CSV content
   const generateCSV = useCallback(() => {
@@ -68,7 +69,10 @@ export function useExcelExport({ participants, eventTitle }: UseExcelExportProps
     const blob = new Blob([csvContent], { type: 'text/csv;charset=utf-8;' })
     
     // Create WhatsApp message with instructions
-    const text = `📊 Participants Excel for "${eventTitle}"\n\nHere's the Excel file with ${participants.length} participants.`
+    const teamViewLink = eventId 
+      ? `${typeof window !== 'undefined' ? window.location.origin : ''}/team/${eventId}`
+      : ''
+    const text = `📊 Participants Excel for "${eventTitle}"\n\nHere's the Excel file with ${participants.length} participants.${teamViewLink ? `\n\nTeam View: ${teamViewLink}` : ''}`
     
     
     // Open WhatsApp
@@ -83,7 +87,7 @@ export function useExcelExport({ participants, eventTitle }: UseExcelExportProps
     document.body.appendChild(link)
     link.click()
     document.body.removeChild(link)
-    }, [participants, eventTitle, generateCSV])
+    }, [participants, eventTitle, eventId, generateCSV])
 
   return {
     downloadExcel,

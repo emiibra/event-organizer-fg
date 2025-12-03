@@ -48,7 +48,8 @@ export default function TeamView({ eventId }: TeamViewProps) {
   })
   const { shareViaWhatsApp } = useExcelExport({ 
     participants, 
-    eventTitle: event?.title || 'Event' 
+    eventTitle: event?.title || 'Event',
+    eventId: eventId
   })
 
 

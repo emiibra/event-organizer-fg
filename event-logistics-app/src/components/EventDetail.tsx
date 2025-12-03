@@ -491,7 +491,6 @@ function OverviewTab({ event, isEditing, editedEvent, onEdit, onSave, onCancel, 
 function TeamTab({ event }: { event: Event }) {
   const setupTeam = [
     { name: "Emilia Bravo", role: "set up team coordinator", phone: "6783604682" },
-    { name: "Maria Garcia", role: "Equipment Manager", phone: "+1 (555) 234-5678" },
   ]
 
   return (
@@ -524,7 +523,7 @@ function LogisticsTab({}: { event: Event }) {
         <h3 className="text-lg font-semibold ">Event Logistics</h3>
         <div className="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
           <p className="text-yellow-800">Logistics management coming soon!</p>
-          <p className="text-sm text-yellow-600 mt-2">This will include your checklist items, setup requirements, and task assignments.</p>
+          <p className="text-sm text-yellow-600 mt-2">This will include your checklist items, setup requirements, and task automation.</p>
         </div>
       </div>
     )
@@ -620,6 +619,7 @@ function QRCodeTab({ event }: { event: Event }) {
       <QRCodeDisplay
         eventId={event.id}
         eventTitle={event.title}
+        raffleItem={event.raffle_item}
         showTitle={true}
       />
   )
@@ -632,7 +632,7 @@ function PaymentsTab({}: { event: Event }) {
       <h3 className="text-lg font-semibold">Post-Event Payments</h3>
       <div className="bg-green-50 border border-green-200 p-4 rounded-lg">
         <p className="text-green-800">Payment management coming soon!</p>
-        <p className="text-sm text-green-600 mt-2">This will handle hours, miles, expenses, and CPA integration.</p>
+        <p className="text-sm text-green-600 mt-2">This will handle hours, miles, expenses, and facilitate communication between team/AP.</p>
       </div>
     </div>
   )

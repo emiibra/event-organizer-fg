@@ -374,10 +374,10 @@ export default function EventForm({ onEventCreated }: EventFormProps) {
         <button
           type="submit"
           disabled={loading}
-          className={`w-full py-2 px-4 rounded-md font-medium ${
+          className={`w-full py-3 px-4 rounded-md font-medium transition-colors${
             loading
               ? 'bg-gray-400 cursor-not-allowed'
-              : 'bg-blue-600 hover:bg-blue-700 text-white'
+              : 'bg-blue-600 hover:bg-blue-700 active:bg-blue-800 text-white touch-manipulation'
           }`}
         >
           {loading ? 'Creating Event...' : 'Create Event'}
